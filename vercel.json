@@ -1,0 +1,1 @@
+{"cleanUrls":true,"rewrites":[{"source":"/((?!icons/|manifest.webmanifest|service-worker.js).*)","destination":"/index.html"}]}
