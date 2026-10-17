@@ -1,8 +1,11 @@
 name: Pubblica FitMatch su Pages
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/pages.yml']
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -16,6 +19,49 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install Pillow==11.3.0
+      - name: Prepara logo e percorsi
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import base64,io,re,json
+          logo='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'
+          image=Image.open(io.BytesIO(base64.b64decode(logo))).convert('RGB')
+          Path('icons').mkdir(exist_ok=True)
+          for size in (32,180,192,512):
+              image.resize((size,size),Image.Resampling.LANCZOS).save(f'icons/icon-{size}.png')
+          mask=Image.new('RGB',(512,512),'#f5efe1')
+          mask.paste(image.resize((360,360),Image.Resampling.LANCZOS),(76,76))
+          mask.save('icons/maskable-512.png')
+          p=Path('index.html'); html=p.read_text()
+          html=re.sub(r'<link rel="(?:icon|apple-touch-icon)"[^>]*>','',html)
+          html=html.replace('<title>','<link rel="icon" href="icons/icon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png"><title>',1)
+          if 'alt="Logo FitMatch"' not in html:
+              html=html.replace('<header>','<header><img src="icons/icon-192.png" alt="Logo FitMatch" width="120" height="120" style="border-radius:24px;max-width:100%">',1)
+          html=html.replace('.part div:first-child{','.parts>div>div:first-child{').replace('.row{display:flex;gap:8px}', '.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1;min-width:140px}')
+          p.write_text(html)
+          manifest={'name':'FitMatch','short_name':'FitMatch','lang':'it','start_url':'./','scope':'./','display':'standalone','background_color':'#f5efe1','theme_color':'#2f5d50','icons':[{'src':f'icons/icon-{s}.png','sizes':f'{s}x{s}','type':'image/png','purpose':'any'} for s in (192,512)]+[{'src':'icons/maskable-512.png','sizes':'512x512','type':'image/png','purpose':'maskable'}]}
+          Path('manifest.webmanifest').write_text(json.dumps(manifest))
+          sw="const CACHE='fitmatch-pages-v4';const BASE=new URL('./',self.location.href);const URLS=['./','index.html','manifest.webmanifest','icons/icon-32.png','icons/icon-180.png','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png'].map(p=>new URL(p,BASE).href);self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('fitmatch-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==BASE.origin||!u.pathname.startsWith(BASE.pathname))return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(async r=>{if(r.ok){const c=await caches.open(CACHE);await c.put(new URL('index.html',BASE),r.clone())}return r}).catch(()=>caches.match(new URL('index.html',BASE))));return}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});"
+          Path('service-worker.js').write_text(sw)
+          for script in re.findall(r'<script>(.*?)</script>',html,re.S):
+              Path('/tmp/fitmatch-check.js').write_text(script)
+          PY
+          node --check /tmp/fitmatch-check.js
+          node --check service-worker.js
+      - name: Salva logo e risorse nel repository
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html manifest.webmanifest service-worker.js icons/*.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'Aggiorna logo e percorsi PWA per GitHub Pages'
+            git push origin HEAD:main
+          fi
       - uses: actions/configure-pages@v5
         with:
           enablement: true
