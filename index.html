@@ -18,4 +18,4 @@ function summary(){return results.map((o,i)=>(i+1)+'. Maglia '+o.shirt+', pantal
 function shareResults(){const text='FitMatch — abbinamenti '+style+':\n\n'+summary();if(navigator.share){navigator.share({title:'FitMatch',text:text}).catch(()=>{})}else{navigator.clipboard.writeText(text).then(()=>alert('Riepilogo copiato.')).catch(()=>alert(text))}}
 function show(id){['start','picker','results','favorites'].forEach(k=>$(k).classList.toggle('hidden',k!==id));if(id==='favorites')renderFavs();window.scrollTo(0,0)}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
-</script></body></html>
+</script><script charset="utf-8" src="fitmatch-v2.js"></script></body></html>
