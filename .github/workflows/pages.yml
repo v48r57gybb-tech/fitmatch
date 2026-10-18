@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/pages.yml', 'index.html', 'fitmatch-v2.js', 'fitmatch-style.js', 'service-worker.js', 'manifest.webmanifest', 'icons/**']
+    paths: ['.github/workflows/pages.yml', 'index.html', 'fitmatch-v2.js', 'fitmatch-style.js', 'fitmatch-layers.js', 'service-worker.js', 'manifest.webmanifest', 'icons/**']
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 concurrency:
@@ -19,35 +19,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Collega nuova interfaccia
+      - name: Verifica sintassi
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          html=p.read_text()
-          if 'src="fitmatch-v2.js"' not in html:
-              html=html.replace('</body>', '<script charset="utf-8" src="fitmatch-v2.js"></script></body>')
-          assert 'src="fitmatch-v2.js"' in html
-          assert 'src="fitmatch-style.js"' in html
-          p.write_text(html)
-          PY
           node --check fitmatch-v2.js
           node --check fitmatch-style.js
+          node --check fitmatch-layers.js
           node --check service-worker.js
-      - name: Salva collegamento nel repository
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          if ! git diff --cached --quiet; then
-            git commit -m 'Collega interfaccia FitMatch v2'
-            git push origin HEAD:main
-          fi
       - uses: actions/configure-pages@v5
       - name: Prepara sito
         run: |
           mkdir -p _site
-          cp index.html manifest.webmanifest service-worker.js fitmatch-v2.js fitmatch-style.js _site/
+          cp index.html manifest.webmanifest service-worker.js fitmatch-v2.js fitmatch-style.js fitmatch-layers.js _site/
           cp -R icons _site/icons
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
