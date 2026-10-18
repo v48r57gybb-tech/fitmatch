@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/pages.yml', 'index.html', 'fitmatch-v2.js', 'service-worker.js', 'manifest.webmanifest', 'icons/**']
+    paths: ['.github/workflows/pages.yml', 'index.html', 'fitmatch-v2.js', 'fitmatch-style.js', 'service-worker.js', 'manifest.webmanifest', 'icons/**']
 permissions:
   contents: write
   pages: write
@@ -28,9 +28,11 @@ jobs:
           if 'src="fitmatch-v2.js"' not in html:
               html=html.replace('</body>', '<script charset="utf-8" src="fitmatch-v2.js"></script></body>')
           assert 'src="fitmatch-v2.js"' in html
+          assert 'src="fitmatch-style.js"' in html
           p.write_text(html)
           PY
           node --check fitmatch-v2.js
+          node --check fitmatch-style.js
           node --check service-worker.js
       - name: Salva collegamento nel repository
         run: |
@@ -45,7 +47,7 @@ jobs:
       - name: Prepara sito
         run: |
           mkdir -p _site
-          cp index.html manifest.webmanifest service-worker.js fitmatch-v2.js _site/
+          cp index.html manifest.webmanifest service-worker.js fitmatch-v2.js fitmatch-style.js _site/
           cp -R icons _site/icons
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
